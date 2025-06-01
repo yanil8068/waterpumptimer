@@ -16,24 +16,15 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         color: white;
-      }
-
-      .timer-container {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 40px;
-        text-align: center;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        min-width: 350px;
+        padding: 20px;
       }
 
       .timer-display {
-        font-size: 4rem;
+        font-size: 5rem;
         font-weight: bold;
         margin: 30px 0;
         font-family: "Courier New", monospace;
@@ -41,8 +32,8 @@
       }
 
       .session-info {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
+        font-size: 1.8rem;
+        margin-bottom: 30px;
         opacity: 0.9;
       }
 
@@ -59,6 +50,7 @@
         gap: 15px;
         justify-content: center;
         flex-wrap: wrap;
+        margin: 20px 0;
       }
 
       button {
@@ -160,40 +152,38 @@
     </style>
   </head>
   <body>
-    <div class="timer-container" id="timerContainer">
-      <div class="session-info" id="sessionInfo">
-        <span class="session-work">Choose Your Starting Session</span>
-      </div>
-
-      <svg class="progress-ring" width="200" height="200">
-        <circle class="progress-circle" cx="100" cy="100" r="90"></circle>
-        <circle
-          class="progress-bar"
-          id="progressBar"
-          cx="100"
-          cy="100"
-          r="90"
-        ></circle>
-      </svg>
-
-      <div class="timer-display" id="timerDisplay">12:00</div>
-
-      <div class="controls" id="controls">
-        <button class="start-btn" onclick="startTimer(12)">
-          Start 12 Min Work
-        </button>
-        <button class="pause-btn" onclick="startTimer(4)">
-          Start 4 Min Break
-        </button>
-      </div>
-
-      <div class="cycle-counter" id="cycleCounter">Cycles completed: 0</div>
+    <div class="session-info" id="sessionInfo">
+      <span class="session-work">Choose Your Starting Session</span>
     </div>
+
+    <svg class="progress-ring" width="200" height="200">
+      <circle class="progress-circle" cx="100" cy="100" r="90"></circle>
+      <circle
+        class="progress-bar"
+        id="progressBar"
+        cx="100"
+        cy="100"
+        r="90"
+      ></circle>
+    </svg>
+
+    <div class="timer-display" id="timerDisplay">12:00</div>
+
+    <div class="controls" id="controls">
+      <button class="start-btn" onclick="startTimer(12)">
+        Start 12 Min Break
+      </button>
+      <button class="pause-btn" onclick="startTimer(4)">
+        Start 4 Min Work
+      </button>
+    </div>
+
+    <div class="cycle-counter" id="cycleCounter">Cycles completed: 0</div>
 
     <script>
       let timerInterval;
       let totalSeconds = 12 * 60; // 12 minutes initially
-      let isWorkSession = null; // null initially, true for 12 min work, false for 4 min break
+      let isWorkSession = null; // null initially, true for 12 min break (previously work), false for 4 min work (previously break)
       let isRunning = false;
       let isPaused = false;
       let cycleCount = 0;
@@ -206,7 +196,6 @@
       const timerDisplay = document.getElementById("timerDisplay");
       const sessionInfo = document.getElementById("sessionInfo");
       const controls = document.getElementById("controls");
-      const timerContainer = document.getElementById("timerContainer");
       const progressBar = document.getElementById("progressBar");
       const cycleCounter = document.getElementById("cycleCounter");
 
@@ -223,19 +212,19 @@
           .toString()
           .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
-        // Update session info
+        // Update session info - swapped names
         if (!hasStarted) {
           sessionInfo.innerHTML =
             '<span class="session-work">Choose Your Starting Session</span>';
           progressBar.classList.remove("break-progress");
         } else if (isWorkSession) {
           sessionInfo.innerHTML =
-            '<span class="session-work">Work Session - 12 Minutes</span>';
-          progressBar.classList.remove("break-progress");
+            '<span class="session-break">Break Session - 12 Minutes</span>';
+          progressBar.classList.add("break-progress");
         } else {
           sessionInfo.innerHTML =
-            '<span class="session-break">Break Time - 4 Minutes</span>';
-          progressBar.classList.add("break-progress");
+            '<span class="session-work">Work Session - 4 Minutes</span>';
+          progressBar.classList.remove("break-progress");
         }
 
         // Update progress ring
@@ -287,7 +276,7 @@
 
       function stopAlarm() {
         stopAlarmSound();
-        timerContainer.classList.remove("alarm-active");
+        document.body.classList.remove("alarm-active");
 
         // Switch to next session and start automatically
         isWorkSession = !isWorkSession;
@@ -321,7 +310,7 @@
       function resetTimer() {
         clearInterval(timerInterval);
         stopAlarmSound();
-        timerContainer.classList.remove("alarm-active");
+        document.body.classList.remove("alarm-active");
 
         isRunning = false;
         isPaused = false;
@@ -337,20 +326,20 @@
 
       function timerCompleted() {
         startAlarmSound();
-        timerContainer.classList.add("alarm-active");
+        document.body.classList.add("alarm-active");
         updateControls();
       }
 
       function updateControls() {
-        if (timerContainer.classList.contains("alarm-active")) {
+        if (document.body.classList.contains("alarm-active")) {
           // Alarm is ringing
           controls.innerHTML =
             '<button class="stop-btn" onclick="stopAlarm()">Stop Alarm</button>';
         } else if (!hasStarted) {
-          // Initial state - choose session type
+          // Initial state - choose session type - swapped button labels
           controls.innerHTML = `
-                    <button class="start-btn" onclick="startTimer(12)">Start 12 Min Work</button>
-                    <button class="pause-btn" onclick="startTimer(4)">Start 4 Min Break</button>
+                    <button class="start-btn" onclick="startTimer(12)">Start 12 Min Break</button>
+                    <button class="pause-btn" onclick="startTimer(4)">Start 4 Min Work</button>
                 `;
         } else if (isRunning && !isPaused) {
           // Timer is running
